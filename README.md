@@ -23,7 +23,7 @@ A practical tool for modern web development workflows.
 - 🚨 **CI/CD integration**: GitHub Actions, custom workflows
 - ⚙️ **Configurable thresholds**: Widely vs newly available features
 - 📝 **Rich reporting**: Detailed compatibility insights
-- 🔄 **Always fresh data**: Uses latest [web-features](https://www.npmjs.com/package/web-features) package
+- 🔄 **Always fresh data**: Auto-generates from latest [web-features](https://www.npmjs.com/package/web-features) package
 
 ## Quick Start
 
@@ -181,9 +181,9 @@ Check out our [React demo repository](https://github.com/hjanuschka/react-baseli
    - HTML: htmlparser2
 
 2. **Detect feature usage** through comprehensive mapping tables:
-   - 200+ JavaScript APIs
-   - 100+ CSS properties and values
-   - 50+ HTML elements and attributes
+   - JavaScript APIs (global functions, browser APIs, DOM methods)
+   - CSS properties and values (modern layout, styling features)
+   - HTML elements and attributes (semantic markup, input types)
 
 3. **Check baseline status** against fresh web-features data:
    - High: Widely available (safe everywhere)
@@ -211,6 +211,13 @@ npm test
 npm run lint
 ```
 
+### Updating Feature Mappings
+
+```bash
+# Update to latest web-features data
+npm run baseline:update
+```
+
 ### Architecture
 
 ```
@@ -221,9 +228,9 @@ baseline-gardener/
 │   ├── baseline/         # web-features integration
 │   ├── reporters/        # Output format generators
 │   └── cli.ts           # Command-line interface
-├── mappings/            # Feature mapping tables
-│   ├── css-features.json
-│   └── js-apis.json
+├── mappings/            # Dynamic feature mapping tables
+│   ├── *-generated.json  # Auto-generated from web-features
+│   └── all-features-generated.json
 └── package.json
 ```
 
@@ -233,8 +240,10 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for deta
 
 ### Adding New Features
 
-1. **Add to mapping files** (`mappings/*.json`)
-2. **Update parsers** if needed
+Feature mappings are automatically generated from the latest [web-features](https://www.npmjs.com/package/web-features) data:
+
+1. **Run mapping update**: `npm run baseline:update`
+2. **Update parsers** if needed for new detection patterns
 3. **Add tests** for the new features
 4. **Update documentation**
 

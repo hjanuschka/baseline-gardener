@@ -11,7 +11,8 @@
     "dev": "tsc --watch",
     "test": "jest",
     "lint": "eslint src --ext ts",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "baseline:update": "tsc src/tools/generate-mappings.ts --outDir dist/tools && node dist/tools/generate-mappings.js"
   },
   "keywords": [
     "baseline",

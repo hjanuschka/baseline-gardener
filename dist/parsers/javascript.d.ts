@@ -10,6 +10,9 @@ export interface DetectedFeature {
 }
 export declare class JavaScriptParser {
     private detectedFeatures;
+    private jsAPIs;
+    constructor();
+    private loadJSMappings;
     parse(code: string, filepath: string): DetectedFeature[];
     private traverseAST;
     private getMemberExpressionPath;

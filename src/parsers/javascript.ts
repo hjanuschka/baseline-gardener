@@ -1,6 +1,15 @@
 import * as parser from '@babel/parser';
 import traverse from '@babel/traverse';
-import jsAPIs from '../../mappings/js-apis.json';
+import * as path from 'path';
+import * as fs from 'fs';
+
+interface JSFeatureMappings {
+  globalAPIs: { [key: string]: string };
+  windowAPIs: { [key: string]: string };
+  elementMethods: { [key: string]: string };
+  documentMethods: { [key: string]: string };
+  cssOM: { [key: string]: string };
+}
 
 export interface DetectedFeature {
   feature: string;
@@ -15,6 +24,26 @@ export interface DetectedFeature {
 
 export class JavaScriptParser {
   private detectedFeatures: DetectedFeature[] = [];
+  private jsAPIs: JSFeatureMappings;
+  
+  constructor() {
+    this.jsAPIs = this.loadJSMappings();
+  }
+  
+  private loadJSMappings(): JSFeatureMappings {
+    try {
+      const mappingsPath = path.join(__dirname, '../../mappings/js-apis-generated.json');
+      const fallbackPath = path.join(__dirname, '../../mappings/js-apis.json');
+      
+      // Try generated mappings first, fallback to static if not found
+      const mappingsFile = fs.existsSync(mappingsPath) ? mappingsPath : fallbackPath;
+      const content = fs.readFileSync(mappingsFile, 'utf-8');
+      return JSON.parse(content);
+    } catch (error) {
+      console.warn('Could not load JS mappings, using empty mappings:', error);
+      return { globalAPIs: {}, windowAPIs: {}, elementMethods: {}, documentMethods: {}, cssOM: {} };
+    }
+  }
   
   parse(code: string, filepath: string): DetectedFeature[] {
     this.detectedFeatures = [];
@@ -52,9 +81,9 @@ export class JavaScriptParser {
         const apiPath = this.getMemberExpressionPath(node);
         
         // Check global APIs
-        if (apiPath && jsAPIs.globalAPIs[apiPath as keyof typeof jsAPIs.globalAPIs]) {
+        if (apiPath && this.jsAPIs.globalAPIs[apiPath]) {
           this.addFeature(
-            jsAPIs.globalAPIs[apiPath as keyof typeof jsAPIs.globalAPIs],
+            this.jsAPIs.globalAPIs[apiPath],
             filepath,
             node.loc?.start || { line: 1, column: 0 },
             apiPath
@@ -68,9 +97,9 @@ export class JavaScriptParser {
           const className = node.callee.name;
           
           // Check window APIs
-          if (jsAPIs.windowAPIs[className as keyof typeof jsAPIs.windowAPIs]) {
+          if (this.jsAPIs.windowAPIs[className]) {
             this.addFeature(
-              jsAPIs.windowAPIs[className as keyof typeof jsAPIs.windowAPIs],
+              this.jsAPIs.windowAPIs[className],
               filepath,
               node.loc?.start || { line: 1, column: 0 },
               `new ${className}()`
@@ -88,9 +117,9 @@ export class JavaScriptParser {
           
           if (apiPath?.startsWith('document.')) {
             const method = apiPath.substring(9);
-            if (jsAPIs.documentMethods[method as keyof typeof jsAPIs.documentMethods]) {
+            if (this.jsAPIs.documentMethods[method]) {
               this.addFeature(
-                jsAPIs.documentMethods[method as keyof typeof jsAPIs.documentMethods],
+                this.jsAPIs.documentMethods[method],
                 filepath,
                 node.loc?.start || { line: 1, column: 0 },
                 apiPath
@@ -101,9 +130,9 @@ export class JavaScriptParser {
           // Check for element methods
           if (apiPath && apiPath.includes('.')) {
             const method = apiPath.split('.').pop();
-            if (method && jsAPIs.elementMethods[method as keyof typeof jsAPIs.elementMethods]) {
+            if (method && this.jsAPIs.elementMethods[method]) {
               this.addFeature(
-                jsAPIs.elementMethods[method as keyof typeof jsAPIs.elementMethods],
+                this.jsAPIs.elementMethods[method],
                 filepath,
                 node.loc?.start || { line: 1, column: 0 },
                 apiPath
@@ -112,21 +141,21 @@ export class JavaScriptParser {
           }
           
           // Check CSS API
-          if (apiPath && jsAPIs.cssOM[apiPath as keyof typeof jsAPIs.cssOM]) {
+          if (apiPath && this.jsAPIs.cssOM[apiPath]) {
             this.addFeature(
-              jsAPIs.cssOM[apiPath as keyof typeof jsAPIs.cssOM],
+              this.jsAPIs.cssOM[apiPath],
               filepath,
               node.loc?.start || { line: 1, column: 0 },
               apiPath
             );
           }
           
-          // Check fetch APIs (member expressions)
+          // Check global APIs (member expressions)
           if (node.callee.property.type === 'Identifier') {
             const name = node.callee.property.name;
-            if (jsAPIs.fetchAPIs[name as keyof typeof jsAPIs.fetchAPIs]) {
+            if (this.jsAPIs.globalAPIs[name]) {
               this.addFeature(
-                jsAPIs.fetchAPIs[name as keyof typeof jsAPIs.fetchAPIs],
+                this.jsAPIs.globalAPIs[name],
                 filepath,
                 node.loc?.start || { line: 1, column: 0 },
                 name
@@ -138,9 +167,9 @@ export class JavaScriptParser {
         // Check for direct function calls (like fetch())
         if (node.callee.type === 'Identifier') {
           const name = node.callee.name;
-          if (jsAPIs.fetchAPIs[name as keyof typeof jsAPIs.fetchAPIs]) {
+          if (this.jsAPIs.globalAPIs[name]) {
             this.addFeature(
-              jsAPIs.fetchAPIs[name as keyof typeof jsAPIs.fetchAPIs],
+              this.jsAPIs.globalAPIs[name],
               filepath,
               node.loc?.start || { line: 1, column: 0 },
               name
@@ -153,24 +182,11 @@ export class JavaScriptParser {
         const node = path.node;
         const name = node.name;
         
-        // Check storage APIs
-        if (jsAPIs.storageAPIs[name as keyof typeof jsAPIs.storageAPIs]) {
-          // Make sure it's actually being accessed, not just declared
-          if (path.isReferencedIdentifier()) {
-            this.addFeature(
-              jsAPIs.storageAPIs[name as keyof typeof jsAPIs.storageAPIs],
-              filepath,
-              node.loc?.start || { line: 1, column: 0 },
-              name
-            );
-          }
-        }
-        
         // Check window APIs as global identifiers
-        if (jsAPIs.windowAPIs[name as keyof typeof jsAPIs.windowAPIs]) {
+        if (this.jsAPIs.windowAPIs[name]) {
           if (path.isReferencedIdentifier()) {
             this.addFeature(
-              jsAPIs.windowAPIs[name as keyof typeof jsAPIs.windowAPIs],
+              this.jsAPIs.windowAPIs[name],
               filepath,
               node.loc?.start || { line: 1, column: 0 },
               name

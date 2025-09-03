@@ -39,9 +39,28 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.JavaScriptParser = void 0;
 const parser = __importStar(require("@babel/parser"));
 const traverse_1 = __importDefault(require("@babel/traverse"));
-const js_apis_json_1 = __importDefault(require("../../mappings/js-apis.json"));
+const path = __importStar(require("path"));
+const fs = __importStar(require("fs"));
 class JavaScriptParser {
     detectedFeatures = [];
+    jsAPIs;
+    constructor() {
+        this.jsAPIs = this.loadJSMappings();
+    }
+    loadJSMappings() {
+        try {
+            const mappingsPath = path.join(__dirname, '../../mappings/js-apis-generated.json');
+            const fallbackPath = path.join(__dirname, '../../mappings/js-apis.json');
+            // Try generated mappings first, fallback to static if not found
+            const mappingsFile = fs.existsSync(mappingsPath) ? mappingsPath : fallbackPath;
+            const content = fs.readFileSync(mappingsFile, 'utf-8');
+            return JSON.parse(content);
+        }
+        catch (error) {
+            console.warn('Could not load JS mappings, using empty mappings:', error);
+            return { globalAPIs: {}, windowAPIs: {}, elementMethods: {}, documentMethods: {}, cssOM: {} };
+        }
+    }
     parse(code, filepath) {
         this.detectedFeatures = [];
         try {
@@ -74,8 +93,8 @@ class JavaScriptParser {
                 const node = path.node;
                 const apiPath = this.getMemberExpressionPath(node);
                 // Check global APIs
-                if (apiPath && js_apis_json_1.default.globalAPIs[apiPath]) {
-                    this.addFeature(js_apis_json_1.default.globalAPIs[apiPath], filepath, node.loc?.start || { line: 1, column: 0 }, apiPath);
+                if (apiPath && this.jsAPIs.globalAPIs[apiPath]) {
+                    this.addFeature(this.jsAPIs.globalAPIs[apiPath], filepath, node.loc?.start || { line: 1, column: 0 }, apiPath);
                 }
             },
             NewExpression: (path) => {
@@ -83,8 +102,8 @@ class JavaScriptParser {
                 if (node.callee.type === 'Identifier') {
                     const className = node.callee.name;
                     // Check window APIs
-                    if (js_apis_json_1.default.windowAPIs[className]) {
-                        this.addFeature(js_apis_json_1.default.windowAPIs[className], filepath, node.loc?.start || { line: 1, column: 0 }, `new ${className}()`);
+                    if (this.jsAPIs.windowAPIs[className]) {
+                        this.addFeature(this.jsAPIs.windowAPIs[className], filepath, node.loc?.start || { line: 1, column: 0 }, `new ${className}()`);
                     }
                 }
             },
@@ -95,51 +114,44 @@ class JavaScriptParser {
                     const apiPath = this.getMemberExpressionPath(node.callee);
                     if (apiPath?.startsWith('document.')) {
                         const method = apiPath.substring(9);
-                        if (js_apis_json_1.default.documentMethods[method]) {
-                            this.addFeature(js_apis_json_1.default.documentMethods[method], filepath, node.loc?.start || { line: 1, column: 0 }, apiPath);
+                        if (this.jsAPIs.documentMethods[method]) {
+                            this.addFeature(this.jsAPIs.documentMethods[method], filepath, node.loc?.start || { line: 1, column: 0 }, apiPath);
                         }
                     }
                     // Check for element methods
                     if (apiPath && apiPath.includes('.')) {
                         const method = apiPath.split('.').pop();
-                        if (method && js_apis_json_1.default.elementMethods[method]) {
-                            this.addFeature(js_apis_json_1.default.elementMethods[method], filepath, node.loc?.start || { line: 1, column: 0 }, apiPath);
+                        if (method && this.jsAPIs.elementMethods[method]) {
+                            this.addFeature(this.jsAPIs.elementMethods[method], filepath, node.loc?.start || { line: 1, column: 0 }, apiPath);
                         }
                     }
                     // Check CSS API
-                    if (apiPath && js_apis_json_1.default.cssOM[apiPath]) {
-                        this.addFeature(js_apis_json_1.default.cssOM[apiPath], filepath, node.loc?.start || { line: 1, column: 0 }, apiPath);
+                    if (apiPath && this.jsAPIs.cssOM[apiPath]) {
+                        this.addFeature(this.jsAPIs.cssOM[apiPath], filepath, node.loc?.start || { line: 1, column: 0 }, apiPath);
                     }
-                    // Check fetch APIs (member expressions)
+                    // Check global APIs (member expressions)
                     if (node.callee.property.type === 'Identifier') {
                         const name = node.callee.property.name;
-                        if (js_apis_json_1.default.fetchAPIs[name]) {
-                            this.addFeature(js_apis_json_1.default.fetchAPIs[name], filepath, node.loc?.start || { line: 1, column: 0 }, name);
+                        if (this.jsAPIs.globalAPIs[name]) {
+                            this.addFeature(this.jsAPIs.globalAPIs[name], filepath, node.loc?.start || { line: 1, column: 0 }, name);
                         }
                     }
                 }
                 // Check for direct function calls (like fetch())
                 if (node.callee.type === 'Identifier') {
                     const name = node.callee.name;
-                    if (js_apis_json_1.default.fetchAPIs[name]) {
-                        this.addFeature(js_apis_json_1.default.fetchAPIs[name], filepath, node.loc?.start || { line: 1, column: 0 }, name);
+                    if (this.jsAPIs.globalAPIs[name]) {
+                        this.addFeature(this.jsAPIs.globalAPIs[name], filepath, node.loc?.start || { line: 1, column: 0 }, name);
                     }
                 }
             },
             Identifier: (path) => {
                 const node = path.node;
                 const name = node.name;
-                // Check storage APIs
-                if (js_apis_json_1.default.storageAPIs[name]) {
-                    // Make sure it's actually being accessed, not just declared
-                    if (path.isReferencedIdentifier()) {
-                        this.addFeature(js_apis_json_1.default.storageAPIs[name], filepath, node.loc?.start || { line: 1, column: 0 }, name);
-                    }
-                }
                 // Check window APIs as global identifiers
-                if (js_apis_json_1.default.windowAPIs[name]) {
+                if (this.jsAPIs.windowAPIs[name]) {
                     if (path.isReferencedIdentifier()) {
-                        this.addFeature(js_apis_json_1.default.windowAPIs[name], filepath, node.loc?.start || { line: 1, column: 0 }, name);
+                        this.addFeature(this.jsAPIs.windowAPIs[name], filepath, node.loc?.start || { line: 1, column: 0 }, name);
                     }
                 }
             }

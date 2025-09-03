@@ -32,15 +32,31 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CSSParser = void 0;
 const csstree = __importStar(require("css-tree"));
-const css_features_json_1 = __importDefault(require("../../mappings/css-features.json"));
+const path = __importStar(require("path"));
+const fs = __importStar(require("fs"));
 class CSSParser {
     detectedFeatures = [];
+    cssFeatures;
+    constructor() {
+        this.cssFeatures = this.loadCSSMappings();
+    }
+    loadCSSMappings() {
+        try {
+            const mappingsPath = path.join(__dirname, '../../mappings/css-features-generated.json');
+            const fallbackPath = path.join(__dirname, '../../mappings/css-features.json');
+            // Try generated mappings first, fallback to static if not found
+            const mappingsFile = fs.existsSync(mappingsPath) ? mappingsPath : fallbackPath;
+            const content = fs.readFileSync(mappingsFile, 'utf-8');
+            return JSON.parse(content);
+        }
+        catch (error) {
+            console.warn('Could not load CSS mappings, using empty mappings:', error);
+            return { properties: {}, values: {}, selectors: {}, 'at-rules': {} };
+        }
+    }
     parse(code, filepath) {
         this.detectedFeatures = [];
         try {
@@ -61,8 +77,8 @@ class CSSParser {
         // Check CSS properties
         if (node.type === 'Declaration') {
             const property = node.property;
-            if (css_features_json_1.default.properties[property]) {
-                this.addFeature(css_features_json_1.default.properties[property], filepath, node.loc?.start || { line: 1, column: 0 }, property, 'css-property');
+            if (this.cssFeatures.properties[property]) {
+                this.addFeature(this.cssFeatures.properties[property], filepath, node.loc?.start || { line: 1, column: 0 }, property, 'css-property');
             }
             // Check values within the declaration
             if (node.value) {
@@ -74,8 +90,8 @@ class CSSParser {
         // Check at-rules
         if (node.type === 'Atrule') {
             const atRule = `@${node.name}`;
-            if (css_features_json_1.default['at-rules'][atRule]) {
-                this.addFeature(css_features_json_1.default['at-rules'][atRule], filepath, node.loc?.start || { line: 1, column: 0 }, atRule, 'css-property');
+            if (this.cssFeatures['at-rules'][atRule]) {
+                this.addFeature(this.cssFeatures['at-rules'][atRule], filepath, node.loc?.start || { line: 1, column: 0 }, atRule, 'css-property');
             }
         }
         // Check selectors
@@ -86,8 +102,8 @@ class CSSParser {
             if (node.children) {
                 selector += '()';
             }
-            if (css_features_json_1.default.selectors[selector]) {
-                this.addFeature(css_features_json_1.default.selectors[selector], filepath, node.loc?.start || { line: 1, column: 0 }, selector, 'css-selector');
+            if (this.cssFeatures.selectors[selector]) {
+                this.addFeature(this.cssFeatures.selectors[selector], filepath, node.loc?.start || { line: 1, column: 0 }, selector, 'css-selector');
             }
         }
     }
@@ -95,15 +111,15 @@ class CSSParser {
         // Check for display values (grid, flex, etc.)
         if (node.type === 'Identifier') {
             const value = node.name;
-            if (css_features_json_1.default.values[value]) {
-                this.addFeature(css_features_json_1.default.values[value], filepath, node.loc?.start || { line: 1, column: 0 }, value, 'css-value');
+            if (this.cssFeatures.values[value]) {
+                this.addFeature(this.cssFeatures.values[value], filepath, node.loc?.start || { line: 1, column: 0 }, value, 'css-value');
             }
         }
         // Check functions
         if (node.type === 'Function') {
             const func = node.name + '()';
-            if (css_features_json_1.default.values[func]) {
-                this.addFeature(css_features_json_1.default.values[func], filepath, node.loc?.start || { line: 1, column: 0 }, func, 'css-value');
+            if (this.cssFeatures.values[func]) {
+                this.addFeature(this.cssFeatures.values[func], filepath, node.loc?.start || { line: 1, column: 0 }, func, 'css-value');
             }
         }
     }

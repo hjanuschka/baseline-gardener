@@ -1,9 +1,37 @@
 import * as csstree from 'css-tree';
-import cssFeatures from '../../mappings/css-features.json';
+import * as path from 'path';
+import * as fs from 'fs';
 import { DetectedFeature } from './javascript';
+
+interface CSSFeatureMappings {
+  properties: { [key: string]: string };
+  values: { [key: string]: string };
+  selectors: { [key: string]: string };
+  'at-rules': { [key: string]: string };
+}
 
 export class CSSParser {
   private detectedFeatures: DetectedFeature[] = [];
+  private cssFeatures: CSSFeatureMappings;
+  
+  constructor() {
+    this.cssFeatures = this.loadCSSMappings();
+  }
+  
+  private loadCSSMappings(): CSSFeatureMappings {
+    try {
+      const mappingsPath = path.join(__dirname, '../../mappings/css-features-generated.json');
+      const fallbackPath = path.join(__dirname, '../../mappings/css-features.json');
+      
+      // Try generated mappings first, fallback to static if not found
+      const mappingsFile = fs.existsSync(mappingsPath) ? mappingsPath : fallbackPath;
+      const content = fs.readFileSync(mappingsFile, 'utf-8');
+      return JSON.parse(content);
+    } catch (error) {
+      console.warn('Could not load CSS mappings, using empty mappings:', error);
+      return { properties: {}, values: {}, selectors: {}, 'at-rules': {} };
+    }
+  }
   
   parse(code: string, filepath: string): DetectedFeature[] {
     this.detectedFeatures = [];
@@ -29,9 +57,9 @@ export class CSSParser {
     if (node.type === 'Declaration') {
       const property = node.property;
       
-      if (cssFeatures.properties[property as keyof typeof cssFeatures.properties]) {
+      if (this.cssFeatures.properties[property]) {
         this.addFeature(
-          cssFeatures.properties[property as keyof typeof cssFeatures.properties],
+          this.cssFeatures.properties[property],
           filepath,
           node.loc?.start || { line: 1, column: 0 },
           property,
@@ -51,9 +79,9 @@ export class CSSParser {
     if (node.type === 'Atrule') {
       const atRule = `@${node.name}`;
       
-      if (cssFeatures['at-rules'][atRule as keyof typeof cssFeatures['at-rules']]) {
+      if (this.cssFeatures['at-rules'][atRule]) {
         this.addFeature(
-          cssFeatures['at-rules'][atRule as keyof typeof cssFeatures['at-rules']],
+          this.cssFeatures['at-rules'][atRule],
           filepath,
           node.loc?.start || { line: 1, column: 0 },
           atRule,
@@ -72,9 +100,9 @@ export class CSSParser {
         selector += '()';
       }
       
-      if (cssFeatures.selectors[selector as keyof typeof cssFeatures.selectors]) {
+      if (this.cssFeatures.selectors[selector]) {
         this.addFeature(
-          cssFeatures.selectors[selector as keyof typeof cssFeatures.selectors],
+          this.cssFeatures.selectors[selector],
           filepath,
           node.loc?.start || { line: 1, column: 0 },
           selector,
@@ -89,9 +117,9 @@ export class CSSParser {
     if (node.type === 'Identifier') {
       const value = node.name;
       
-      if (cssFeatures.values[value as keyof typeof cssFeatures.values]) {
+      if (this.cssFeatures.values[value]) {
         this.addFeature(
-          cssFeatures.values[value as keyof typeof cssFeatures.values],
+          this.cssFeatures.values[value],
           filepath,
           node.loc?.start || { line: 1, column: 0 },
           value,
@@ -104,9 +132,9 @@ export class CSSParser {
     if (node.type === 'Function') {
       const func = node.name + '()';
       
-      if (cssFeatures.values[func as keyof typeof cssFeatures.values]) {
+      if (this.cssFeatures.values[func]) {
         this.addFeature(
-          cssFeatures.values[func as keyof typeof cssFeatures.values],
+          this.cssFeatures.values[func],
           filepath,
           node.loc?.start || { line: 1, column: 0 },
           func,
