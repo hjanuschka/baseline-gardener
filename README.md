@@ -1,5 +1,7 @@
 
 
+![Baseline Gardener](gardener_logo.png)
+
 # 🌱 Baseline Gardener
 
 **Nurture baseline-compatible web code - A CI/CD tool to check web feature baseline compatibility**
