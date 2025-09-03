@@ -170,8 +170,7 @@ Check out our [React demo repository](https://github.com/hjanuschka/react-baseli
 
 - ✅ **Baseline-safe code** using widely available features
 - ❌ **Experimental code** using cutting-edge APIs  
-- 🔧 **CI/CD setup** with GitHub Actions
-- 📊 **Multiple report formats** 
+- 🔧 **CI/CD setup** with GitHub Actions 
 
 ## How It Works
 
