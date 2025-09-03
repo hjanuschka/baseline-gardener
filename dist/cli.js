@@ -58,6 +58,7 @@ program
     .option('--min-age <months>', 'Minimum months since baseline', '0')
     .option('--config <path>', 'Path to config file', '.baselinerc.json')
     .option('-o, --output <file>', 'Output file (default: stdout)')
+    .option('--ai', 'Generate AI-optimized markdown for LLM auto-fixing', false)
     .action(async (path, options) => {
     try {
         console.log(chalk_1.default.green('🌱 Baseline Gardener - Growing baseline-compatible code...'));
@@ -74,7 +75,8 @@ program
             config: options.config
         });
         // Generate report
-        const reporter = (0, reporters_1.createReporter)(options.format);
+        const format = options.ai ? 'ai' : options.format;
+        const reporter = (0, reporters_1.createReporter)(format);
         const report = reporter.generate(results);
         // Output report
         if (options.output) {

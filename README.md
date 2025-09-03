@@ -59,10 +59,11 @@ baseline-gardener scan --format markdown -o report.md
 baseline-gardener scan [path] [options]
 
 Options:
-  -f, --format <format>         Output format (text, json, markdown, sarif)
+  -f, --format <format>         Output format (text, json, markdown, sarif, ai)
   --require-baseline <level>    Required baseline level (widely, newly)
   --allow-experimental          Allow non-baseline features
   --update-baseline            Update to latest web-features data
+  --ai                         Generate AI-optimized markdown for LLM auto-fixing
   -o, --output <file>          Output file (default: stdout)
   --config <path>              Path to config file
   -h, --help                   Display help
@@ -167,6 +168,22 @@ Perfect for documentation and reports:
 
 ### SARIF
 For GitHub Code Scanning and security tools integration.
+
+### AI Format
+AI-optimized markdown designed for LLM processing and automatic code fixing:
+
+```bash
+baseline-gardener scan --ai -o ai-report.md
+```
+
+This format includes:
+- **Structured issue breakdown** by file and location
+- **Code context** with problematic snippets  
+- **Fix suggestions** with baseline-compatible alternatives
+- **AI processing instructions** for automated remediation
+- **Explanation of issues** to help LLMs understand the context
+
+Perfect for feeding into Claude, GPT, or other LLMs for automatic baseline compatibility fixes.
 
 ## Real-World Example
 
