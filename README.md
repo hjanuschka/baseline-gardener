@@ -1,3 +1,5 @@
+![Baseline Gardener](https://raw.githubusercontent.com/hjanuschka/baseline-gardener/master/gardener.png)
+
 # 🌱 Baseline Gardener
 
 **Nurture baseline-compatible web code - A CI/CD tool to check web feature baseline compatibility**
