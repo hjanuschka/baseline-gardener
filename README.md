@@ -1,15 +1,15 @@
-# 🔍 Baseline Guardian
+# 🌱 Baseline Gardener
 
-**A CLI tool to check your codebase for web feature baseline compatibility**
+**Nurture baseline-compatible web code - A CI/CD tool to check web feature baseline compatibility**
 
-[![npm version](https://badge.fury.io/js/baseline-guardian.svg)](https://badge.fury.io/js/baseline-guardian)
-[![Node.js CI](https://github.com/your-org/baseline-guardian/workflows/CI/badge.svg)](https://github.com/your-org/baseline-guardian/actions)
+[![npm version](https://badge.fury.io/js/baseline-gardener.svg)](https://badge.fury.io/js/baseline-gardener)
+[![Node.js CI](https://github.com/hjanuschka/baseline-gardener/workflows/CI/badge.svg)](https://github.com/hjanuschka/baseline-gardener/actions)
 
-Built for the [Baseline Tooling Hackathon](https://baseline2024.devpost.com) 🏆
+A practical tool for modern web development workflows.
 
 ## What is Baseline?
 
-[Baseline](https://web.dev/baseline) provides clear information about which web platform features work across modern browsers. Baseline Guardian helps you:
+[Baseline](https://web.dev/baseline) provides clear information about which web platform features work across modern browsers. Baseline Gardener helps you:
 
 - ✅ **Avoid compatibility surprises** - Know what won't work before users complain
 - 📈 **Make informed decisions** - Data-driven choices about when to adopt new features  
@@ -30,29 +30,29 @@ Built for the [Baseline Tooling Hackathon](https://baseline2024.devpost.com) �
 ### Installation
 
 ```bash
-npm install -g baseline-guardian
+npm install -g baseline-gardener
 ```
 
 ### Basic Usage
 
 ```bash
 # Scan current directory
-baseline-guardian scan
+baseline-gardener scan
 
 # Scan specific path
-baseline-guardian scan ./src
+baseline-gardener scan ./src
 
 # Require only widely available features
-baseline-guardian scan --require-baseline widely
+baseline-gardener scan --require-baseline widely
 
 # Generate markdown report
-baseline-guardian scan --format markdown -o report.md
+baseline-gardener scan --format markdown -o report.md
 ```
 
 ## Command Line Options
 
 ```bash
-baseline-guardian scan [path] [options]
+baseline-gardener scan [path] [options]
 
 Options:
   -f, --format <format>         Output format (text, json, markdown, sarif)
@@ -118,8 +118,8 @@ jobs:
     - uses: actions/setup-node@v4
       with:
         node-version: '20'
-    - run: npm install -g baseline-guardian
-    - run: baseline-guardian scan --format sarif -o results.sarif
+    - run: npm install -g baseline-gardener
+    - run: baseline-gardener scan --format sarif -o results.sarif
     - uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: results.sarif
@@ -129,8 +129,8 @@ jobs:
 
 ```bash
 # Any CI system
-npm install -g baseline-guardian
-baseline-guardian scan --format json
+npm install -g baseline-gardener
+baseline-gardener scan --format json
 ```
 
 ## Output Formats
@@ -143,7 +143,7 @@ Machine-readable format for integration with other tools:
 
 ```json
 {
-  "metadata": { "tool": "baseline-guardian", "version": "1.0.0" },
+  "metadata": { "tool": "baseline-gardener", "version": "1.0.0" },
   "summary": { "totalFiles": 12, "baselineFeatures": 45, "issues": 3 },
   "issues": [...]
 }
@@ -166,7 +166,7 @@ For GitHub Code Scanning and security tools integration.
 
 ## Real-World Example
 
-Check out our [demo repository](../baseline-guardian-demo) that shows baseline-guardian in action with:
+Check out our [React demo repository](https://github.com/hjanuschka/react-baseline-sample) that shows baseline-gardener in action with:
 
 - ✅ **Baseline-safe code** using widely available features
 - ❌ **Experimental code** using cutting-edge APIs  
@@ -197,8 +197,8 @@ Check out our [demo repository](../baseline-guardian-demo) that shows baseline-g
 ### Build from source
 
 ```bash
-git clone https://github.com/your-org/baseline-guardian
-cd baseline-guardian
+git clone https://github.com/hjanuschka/baseline-gardener
+cd baseline-gardener
 npm install
 npm run build
 npm link
@@ -214,7 +214,7 @@ npm run lint
 ### Architecture
 
 ```
-baseline-guardian/
+baseline-gardener/
 ├── src/
 │   ├── parsers/          # Language-specific parsers
 │   ├── detectors/        # Feature detection logic  
@@ -268,8 +268,7 @@ MIT © [Your Name]
 
 - Built with [web-features](https://www.npmjs.com/package/web-features) data
 - Inspired by [eslint-plugin-compat](https://github.com/amilajack/eslint-plugin-compat)
-- Created for the Baseline Tooling Hackathon
 
 ---
 
-**⭐ Star this repo if baseline-guardian helps you ship better web apps!**
+**⭐ Star this repo if baseline-gardener helps you ship better web apps!**
