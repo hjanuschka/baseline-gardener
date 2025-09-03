@@ -247,14 +247,6 @@ Feature mappings are automatically generated from the latest [web-features](http
 3. **Add tests** for the new features
 4. **Update documentation**
 
-## Roadmap
-
-- [ ] **Framework integrations**: React, Angular, Svelte plugins
-- [ ] **IDE extensions**: VS Code, WebStorm plugins  
-- [ ] **More output formats**: JUnit XML, TAP
-- [ ] **Performance optimization**: Faster scanning
-- [ ] **Advanced rules**: Custom compatibility targets
-
 ## FAQ
 
 **Q: How accurate is the baseline data?**
