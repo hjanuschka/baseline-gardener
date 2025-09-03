@@ -1,4 +1,4 @@
-![Baseline Gardener](https://raw.githubusercontent.com/hjanuschka/baseline-gardener/master/gardener.png)
+![Baseline Gardener](gardener.png)
 
 # 🌱 Baseline Gardener
 
