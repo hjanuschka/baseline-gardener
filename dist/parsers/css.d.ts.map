@@ -1,0 +1,1 @@
+{"version":3,"file":"css.d.ts","sourceRoot":"","sources":["../../src/parsers/css.ts"],"names":[],"mappings":"AAEA,OAAO,EAAE,eAAe,EAAE,MAAM,cAAc,CAAC;AAE/C,qBAAa,SAAS;IACpB,OAAO,CAAC,gBAAgB,CAAyB;IAEjD,KAAK,CAAC,IAAI,EAAE,MAAM,EAAE,QAAQ,EAAE,MAAM,GAAG,eAAe,EAAE;IAmBxD,OAAO,CAAC,WAAW;IA4DnB,OAAO,CAAC,YAAY;IAgCpB,OAAO,CAAC,UAAU;CAkBnB"}
