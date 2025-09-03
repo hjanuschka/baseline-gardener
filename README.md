@@ -1,15 +1,15 @@
-![Baseline Gardener](gardener.png)
+
 
 # 🌱 Baseline Gardener
 
 **Nurture baseline-compatible web code - A CI/CD tool to check web feature baseline compatibility**
 
-[![npm version](https://badge.fury.io/js/baseline-gardener.svg)](https://badge.fury.io/js/baseline-gardener)
-[![Node.js CI](https://github.com/hjanuschka/baseline-gardener/workflows/CI/badge.svg)](https://github.com/hjanuschka/baseline-gardener/actions)
-
 A practical tool for modern web development workflows.
 
 ## What is Baseline?
+
+
+![Baseline Gardener](gardener.png)
 
 [Baseline](https://web.dev/baseline) provides clear information about which web platform features work across modern browsers. Baseline Gardener helps you:
 
