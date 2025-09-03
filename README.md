@@ -263,7 +263,7 @@ A: Configure ignored features for APIs you're polyfilling. The tool focuses on n
 
 ## License
 
-MIT © [Your Name]
+MIT
 
 ## Credits
 
