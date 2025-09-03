@@ -125,13 +125,13 @@ class MappingGenerator {
 
     // Map display values
     if (['grid', 'flexbox', 'flex'].includes(featureId)) {
-      const displayValues = {
+      const displayValues: { [key: string]: string[] } = {
         'grid': ['grid', 'inline-grid'],
         'flexbox': ['flex', 'inline-flex'],
         'flex': ['flex', 'inline-flex']
       };
       if (displayValues[featureId]) {
-        displayValues[featureId].forEach(val => {
+        displayValues[featureId].forEach((val: string) => {
           this.mapping.css.values[val] = featureId;
         });
         mapped = true;
